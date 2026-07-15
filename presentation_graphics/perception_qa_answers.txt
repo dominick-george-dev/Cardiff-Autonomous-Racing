@@ -1,0 +1,98 @@
+PERCEPTION SECTION - Q&A ANSWERS (FS-AI 2026 Presentation)
+=============================================================
+
+
+Q1. Why not LiDAR?
+-------------------------------------------------------------
+We use stereo depth from the stock ZED2, camera-only. At the
+ranges that matter for this task - cones are only useful to us
+out to about 15 metres - stereo depth is accurate enough, and
+skipping LiDAR halves our sensor integration overhead on a
+vehicle we share with other subteams. It's not a dismissal of
+LiDAR - it's the natural next upgrade if we need better range
+or lighting robustness, but it wasn't the bottleneck this year.
+
+
+Q2. Why EKF over particle filter / graph SLAM?
+-------------------------------------------------------------
+Our landmark count is small - around 70 cones on a full track -
+and the noise on our detections is well-approximated as
+Gaussian, so the classic EKF assumptions actually hold here.
+EKF also gives us a per-timestep, directly inspectable state
+vector, which matters a lot for debugging. Graph SLAM earns its
+complexity at much larger map sizes than we ever operate at -
+it would be solving a problem we don't have.
+
+
+Q3. What happens on data association failures?
+-------------------------------------------------------------
+We gate association with a Mahalanobis distance test, so a
+detection only matches an existing landmark if it's
+statistically consistent with that landmark's current
+uncertainty - otherwise it starts a new landmark instead of
+corrupting an existing one. Wrong association is the classic
+failure mode for EKF-SLAM, but we haven't observed it across
+any of our validated laps, partly because cone colour acts as
+a hard constraint on top of the distance gate - a blue
+detection literally cannot match a yellow landmark.
+
+
+Q4. What's your position error budget?
+-------------------------------------------------------------
+Track lanes are about 3 metres wide at their narrowest. Our
+measured position RMSE is 0.67 metres with a mean heading error
+around 1 degree, so we have comfortable margin to stay in-lane
+even under our worst-case measured error, not just on average.
+
+
+Q5. How do you know the sim transfers to the real car?
+-------------------------------------------------------------
+We're careful not to overclaim here. What we can say with
+confidence is that the code path and message contracts are
+identical between sim and real - every real-car difference is
+a launch parameter, like the ZED2 topic names or the IMU
+source, not a rewrite. What we can't yet claim is full sensor
+realism - things like lighting conditions and real depth noise
+characteristics are the known gap, and we say that openly
+rather than hide it.
+
+
+Q6. Is the IMU on the camera or the vehicle?
+-------------------------------------------------------------
+On the real car we use the vehicle's own IMU over
+/ros_can/imu, not one built into the camera - yaw rate is
+independent of mount position on a rigid body, so this is the
+more robust choice. In simulation we use EUFS's IMU plugin
+instead. Either way, the topic name is just a launch parameter,
+so it's the same code underneath.
+
+
+Q7. What about cone colour errors or unknown-class cones?
+-------------------------------------------------------------
+Our contract with Path Planning is: blue marks the left
+boundary, yellow marks the right, and orange plus
+unknown-class cones are explicitly excluded from boundary
+logic - they don't get used to define the track edge. So a
+misclassified orange or unknown cone can't accidentally redraw
+a track boundary; it's a deliberate defensive choice in how the
+map is consumed downstream, not just how it's built.
+
+
+Q8. Is that mapped result (65/67 cones, 0.67m RMSE) your
+    best-case run, or typical?
+-------------------------------------------------------------
+Best to volunteer this before being asked: that's a real
+validated lap, and we should be upfront about whether it's our
+best run or a typical one - [FILL IN: state honestly which it
+is for your actual data]. What we can say regardless is that
+this isn't a cherry-picked demo: it's produced by an automated
+regression test that runs the same way - full autonomous lap in
+EUFS sim against ground truth - on every change to perception,
+so the number reported is reproducible, not hand-picked for the
+deck.
+
+
+=============================================================
+NOTE: Fill in the bracketed placeholder in Q8 before presenting -
+confirm whether the 65/67 + 0.67m result is your best validated
+lap or a typical one.

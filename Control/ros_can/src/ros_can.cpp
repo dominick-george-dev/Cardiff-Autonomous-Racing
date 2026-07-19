@@ -330,9 +330,9 @@ sensor_msgs::msg::Imu CanInterface::makeImuMessage(const fs_ai_api_imu_struct &d
 
   // Get accelerations
   const float G_VALUE = 9.80665;
-  msg.linear_acceleration.x = data.IMU_Acceleration_X_mG * 1000 * G_VALUE;
-  msg.linear_acceleration.y = data.IMU_Acceleration_Y_mG * 1000 * G_VALUE;
-  msg.linear_acceleration.z = data.IMU_Acceleration_Z_mG * 1000 * G_VALUE;
+  msg.linear_acceleration.x = (data.IMU_Acceleration_X_mG / 1000) * G_VALUE;
+  msg.linear_acceleration.y = (data.IMU_Acceleration_Y_mG / 1000) * G_VALUE;
+  msg.linear_acceleration.z = (data.IMU_Acceleration_Z_mG / 1000) * G_VALUE;
 
   // Get angular velocity
   msg.angular_velocity.x = (data.IMU_Rotation_X_degps / 180) * M_PI;

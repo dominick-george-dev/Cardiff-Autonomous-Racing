@@ -137,10 +137,11 @@ void CanInterface::loop() {
 
 fs_ai_api_handshake_send_bit_e CanInterface::getHandshake(const fs_ai_api_vcu2ai_struct data) {
   auto handshake = data.VCU2AI_HANDSHAKE_RECEIVE_BIT;
-  if (handshake == fs_ai_api_handshake_receive_bit_e::HANDSHAKE_RECEIVE_BIT_OFF)
-    return fs_ai_api_handshake_send_bit_e::HANDSHAKE_SEND_BIT_ON;
-  else
+  if (handshake == fs_ai_api_handshake_receive_bit_e::HANDSHAKE_RECEIVE_BIT_OFF){
     return fs_ai_api_handshake_send_bit_e::HANDSHAKE_SEND_BIT_OFF;
+  } else { 
+    return fs_ai_api_handshake_send_bit_e::HANDSHAKE_SEND_BIT_ON;
+  }
 }
 
 fs_ai_api_direction_request_e CanInterface::getDirectionReq(const fs_ai_api_vcu2ai_struct data) {

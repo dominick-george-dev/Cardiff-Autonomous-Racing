@@ -65,3 +65,15 @@ class autocrossFlag(Enum):
     LAP = 1
     BRAKE = 2
     COMPLETE = 3
+
+
+class TrackFlag(Enum):
+    """
+    Represents the current progress of the Trackdrive mission
+    and what the vehicle's current objective is.
+    """
+    START = 0 #Record the staging position, reset the lap counter
+    LAP = 1 #Follow the path, counting laps past the start point
+    FINISH = 2 #10 laps done, keep driving until the finish line is behind us
+    BRAKE = 3 #Brake to a complete stop (must stop within 30m of the line, D8.2.7)
+    COMPLETE = 4 #Mission complete, request AS Finished

@@ -12,14 +12,18 @@ def generate_launch_description():
         executable="ros_can_node",
         name="ros_can",
         parameters=[
-            {"use_sim_time": True},
+            # False on the real car: nothing publishes /clock there, and True
+            # would stamp all sensor msgs with time 0 (breaks SLAM) and
+            # disable the /cmd watchdog. Sim launches override this.
+            {"use_sim_time": False},
             {"can_debug": 0},
             {"simulate_can": 0},
             {"can_interface": can_interface_arg},
             {"loop_rate": 100},
             {"rpm_limit": 4000},
-            {"max_acc": 5.0},
-            {"max_braking": 5.0},
+            # the node declares max_dec (not max_acc/max_braking); 10.0 is
+            # the default it was already running with, now explicit
+            {"max_dec": 10.0},
             {"cmd_timeout": 0.5}
         ],
         arguments=['--ros-args', '--log-level', 'debug'],

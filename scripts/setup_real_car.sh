@@ -15,15 +15,18 @@
 set -o pipefail
 
 # ---------------------------------------------------------------------------
-# Configuration — confirm topic names on the day (ros2 topic list | grep zed)
+# Configuration — camera topics and model are AUTO-DETECTED on the day (they
+# vary with wrapper version / camera model / namespace). To force a value,
+# export it before running, e.g.:
+#   RGB_TOPIC=/zed2i/zed_node/rgb/image_rect_color ./setup_real_car.sh
 # ---------------------------------------------------------------------------
-RGB_TOPIC="/zed/zed_node/rgb/image_rect_color"
-DEPTH_TOPIC="/zed/zed_node/depth/depth_registered"
-CAMERA_INFO_TOPIC="/zed/zed_node/left/camera_info"
+RGB_TOPIC="${RGB_TOPIC:-}"                  # empty = auto-detect
+DEPTH_TOPIC="${DEPTH_TOPIC:-}"              # empty = auto-detect
+CAMERA_INFO_TOPIC="${CAMERA_INFO_TOPIC:-}"  # empty = auto-detect
+CAMERA_MODEL="${CAMERA_MODEL:-auto}"        # auto = detect from USB, else e.g. zed2/zed2i
 IMU_TOPIC="/ros_can/imu"          # ADS-DV onboard IMU via ros_can
 CAMERA_X_OFFSET="0.0"             # metres forward of car reference — measure
 CAMERA_Y_OFFSET="0.0"             # metres left of car reference   — and edit!
-CAMERA_MODEL="zed2"
 ZED_WS="$HOME/zed_ws"
 CAMERA_STARTUP_TIMEOUT=45         # s to wait for ZED topics after launch
 
@@ -97,9 +100,12 @@ source "$WS/install/setup.bash"
 # ---------------------------------------------------------------------------
 mkdir -p "$LOG_DIR"
 topic_up() { ros2 topic list 2>/dev/null | grep -qx "$1"; }
+source "$SCRIPT_DIR/zed_topics.sh"
 
 step "ZED camera"
-if topic_up "$RGB_TOPIC"; then
+detect_camera_model
+
+if any_zed_image_up; then
   echo "  already publishing"
 else
   [ -f "$ZED_WS/install/setup.bash" ] \
@@ -109,14 +115,21 @@ else
   nohup ros2 launch zed_wrapper zed_camera.launch.py camera_model:="$CAMERA_MODEL" \
     >"$LOG_DIR/zed_camera.log" 2>&1 &
   waited=0
-  until topic_up "$RGB_TOPIC"; do
+  until any_zed_image_up; do
     sleep 3; waited=$((waited+3))
     [ "$waited" -ge "$CAMERA_STARTUP_TIMEOUT" ] \
       && die "camera topics not up after ${CAMERA_STARTUP_TIMEOUT}s — check $LOG_DIR/zed_camera.log and that the ZED is plugged into USB3"
-    echo "  waiting for $RGB_TOPIC (${waited}s)..."
+    echo "  waiting for ZED image topics (${waited}s)..."
   done
   echo "  camera up"
 fi
+
+# ---------------------------------------------------------------------------
+# 4b. Resolve the actual topic names from what the wrapper publishes
+# ---------------------------------------------------------------------------
+step "Resolving camera topics"
+sleep 2   # let late topics finish registering
+resolve_zed_topics || die "camera topic auto-detection failed — override via RGB_TOPIC/DEPTH_TOPIC/CAMERA_INFO_TOPIC env vars"
 
 # ---------------------------------------------------------------------------
 # 5. Launch perception (ON_CAR_SETUP.md step 7C)

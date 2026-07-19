@@ -79,18 +79,27 @@ source /opt/ros/humble/setup.bash && source ~/cardiff-autonomous-racing/Control/
 ros2 launch ros_can ros_can.launch.py
 ```
 
-Confirm the real camera topic names first — they depend on wrapper config:
+Camera topic names and camera model do NOT need to be known in advance:
+`scripts/setup_real_car.sh` (used by the skidpad/lap/trackdrive runners, or
+run standalone) auto-detects the camera model from USB, launches the wrapper,
+resolves the live RGB / depth / camera_info topic names from `ros2 topic list`,
+verifies their message types, and prints what it picked. To force a value:
+
 ```bash
-ros2 topic list | grep zed
+RGB_TOPIC=/zed2i/zed_node/rgb/image_rect_color \
+DEPTH_TOPIC=/zed2i/zed_node/depth/depth_registered \
+CAMERA_INFO_TOPIC=/zed2i/zed_node/rgb/camera_info \
+CAMERA_MODEL=zed2i ./scripts/setup_real_car.sh
 ```
 
-Terminal C — perception (adjust topic names to what step above printed):
+Terminal C — perception, only if launching by hand instead of the script
+(get the topic names from `ros2 topic list | grep zed`):
 ```bash
 source /opt/ros/humble/setup.bash && source ~/cardiff-autonomous-racing/perception_ws/install/setup.bash
 ros2 run cone_detector YOLO_cone_detector --ros-args \
   -p rgb_topic:=/zed/zed_node/rgb/image_rect_color \
   -p depth_topic:=/zed/zed_node/depth/depth_registered \
-  -p camera_info_topic:=/zed/zed_node/left/camera_info &
+  -p camera_info_topic:=/zed/zed_node/rgb/camera_info &
 ros2 run landmark_slam landmark_slam --ros-args -p imu_topic:=/ros_can/imu &
 ros2 run cone_mapper cone_mapper &
 ```
@@ -196,3 +205,54 @@ if SLAM goes quiet >0.5 s or the planner >2 s, and stops after [laps].
 and perception (leaves ros_can running).
 
 First run: 2.0 m/s, one lap, walk the fallbacks like the skidpad procedure.
+
+## 12. TRACKDRIVE mission (added 2026-07-19)
+
+One command runs the whole stack for the D8 Trackdrive event (10 laps):
+
+```bash
+~/cardiff-autonomous-racing/scripts/run_trackdrive_car.sh [speed_mps]   # default 2.5
+```
+
+It is a wrapper over `run_full_autonomous_lap_car.sh` (section 11 — same
+pipeline, same dependency checks, same teardown with `stop`) with the D8
+requirements baked in:
+
+- **10 laps, self-counted** (D8.2.8): laps are detected on the SLAM start
+  disc — leave 15 m, return within 4 m.
+- **Mission gate**: the follower refuses to move unless ros_can reports
+  `AMI:TRACKDRIVE` *and* `AS:DRIVING`, so officials can select other
+  missions on the AMI panel without the car lurching.
+- **Finish line** (D8.2.5–D8.2.7): the car is staged 6 m before the start
+  line; after lap 10 the follower keeps driving until it is 8 m past the
+  staging point (≈2 m past the line, so the last lap gets a time), then
+  brakes, stops well inside the 30 m allowance, and publishes
+  `mission_completed` → ros_can reports MISSION_FINISHED → VCU enters
+  **AS Finished**.
+
+Procedure on the day:
+
+1. Stage the car: front wheels 6 m before the start line (D8.2.5), pointed
+   down the track, cones in view of the camera.
+2. Run the script. It checks deps, starts ros_can if needed, brings up
+   camera + perception, starts the planner, waits for `/planned_path`,
+   then arms the follower and prints "select the mission".
+3. Officials select TRACKDRIVE on the AMI panel, ASMS on, RES 'Go'.
+   The car drives when the VCU reaches AS_DRIVING.
+4. RES/EBS stops the car at any time as normal; the follower also brakes
+   itself if SLAM goes quiet >0.5 s or the planner >2 s.
+
+Do NOT run Control's `command_node` (`start_control.sh`) at the same time —
+the runner kills it automatically, it would fight the follower on `/cmd`.
+(`mission_control.py` also has a trackdrive branch now — MPC-based, same
+lap-counting scheme — but the follower pipeline is the one proven end-to-end
+in the sim; treat mission_control's as the backup.)
+
+DOO cones are not replaced during the run (D8.2.9) — if the track gets
+messy the planner must cope or the RES stops the run; there are no re-runs.
+
+First run of the day: one shakedown lap at low speed first:
+
+```bash
+~/cardiff-autonomous-racing/scripts/run_full_autonomous_lap_car.sh 1 2.0
+```

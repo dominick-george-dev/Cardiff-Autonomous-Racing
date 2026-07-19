@@ -221,6 +221,15 @@ class CmdNode(Node):
         v_y = l_velocity.x * math.sin(yaw) + l_velocity.y * math.cos(yaw)  # sideways (perpendicular)
 
 
+        #update the shared vehicle state used by mission control in place
+        #(wheels_rpm and steering_angle_rad are filled in by wheel_speeds_callback)
+        self.current_state.xpos = position.x
+        self.current_state.ypos = position.y
+        self.current_state.directional_velocity = v_x
+        self.current_state.perpendicualar_velocity = v_y
+        self.current_state.yaw_angle = yaw
+        self.current_state.yaw_rate = a_velocity.z
+
         state = Vehicle_State(
             x_pos=position.x,
             y_pos=position.y,

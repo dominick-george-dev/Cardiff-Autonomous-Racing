@@ -11,6 +11,8 @@ set -uo pipefail
 
 REPO="$HOME/cardiff-autonomous-racing"
 source /opt/ros/humble/setup.bash
+# ZED camera model + topic names are auto-detected (override via env vars)
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/zed_topics.sh"
 
 cleanup() { kill 0 2>/dev/null; }
 trap cleanup EXIT INT TERM
@@ -22,21 +24,32 @@ echo "[1/4] ros_can (CAN bridge — mission state, IMU, twist)"
   ros2 launch ros_can ros_can.launch.py ) &
 sleep 3
 
-echo "[2/4] ZED2 camera driver"
+echo "[2/4] ZED camera driver"
+detect_camera_model
 ( source "$HOME/zed_ws/install/setup.bash" &&
-  ros2 launch zed_wrapper zed_camera.launch.py camera_model:=zed2 ) &
-sleep 8
+  ros2 launch zed_wrapper zed_camera.launch.py camera_model:="$CAMERA_MODEL" ) &
 
-echo "      Verifying camera topics (adjust this script if names differ)"
-timeout 10 ros2 topic list | grep -E "zed" | head -8 || echo "  WARNING: no /zed topics yet"
+echo "      Waiting for camera topics..."
+waited=0
+until any_zed_image_up; do
+  sleep 3; waited=$((waited+3))
+  if [ "$waited" -ge 45 ]; then
+    echo "  WARNING: no ZED image topics after ${waited}s — check USB3 / zed_wrapper"
+    break
+  fi
+done
+sleep 2   # let late topics finish registering
+
+echo "      Resolving camera topics"
+resolve_zed_topics || { echo "ABORT: camera topic auto-detection failed"; exit 1; }
 
 echo "[3/4] Perception nodes"
 source "$REPO/perception_ws/install/setup.bash"
 
 ros2 run cone_detector YOLO_cone_detector --ros-args \
-  -p rgb_topic:=/zed/zed_node/rgb/image_rect_color \
-  -p depth_topic:=/zed/zed_node/depth/depth_registered \
-  -p camera_info_topic:=/zed/zed_node/left/camera_info &
+  -p rgb_topic:="$RGB_TOPIC" \
+  -p depth_topic:="$DEPTH_TOPIC" \
+  -p camera_info_topic:="$CAMERA_INFO_TOPIC" &
 
 ros2 run landmark_slam landmark_slam --ros-args \
   -p imu_topic:=/ros_can/imu &

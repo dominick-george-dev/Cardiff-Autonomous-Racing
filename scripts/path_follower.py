@@ -52,7 +52,8 @@ def yaw_from_quat(q):
 
 
 class PathFollower(Node):
-    def __init__(self, target_speed, laps, mission, real_car=False):
+    def __init__(self, target_speed, laps, mission, real_car=False,
+                 require_ami='', finish_overrun=0.0):
         super().__init__('path_follower')
         # sim time only in the simulator; the car runs on wall clock
         self.set_parameters([Parameter('use_sim_time', Parameter.Type.BOOL, not real_car)])
@@ -61,6 +62,15 @@ class PathFollower(Node):
         self.target_laps = laps
         self.mission = mission
         self.real_car = real_car
+        # only start driving if the AMI selector shows this mission (substring
+        # of ros_can's state_str, e.g. TRACKDRIVE); '' = accept any mission
+        self.require_ami = require_ami
+        # after the final lap keep driving until this far from the start disc
+        # before braking, so the car crosses the finish line first (D8.2.6/7:
+        # staged 6 m before the line, stop within 30 m after it); 0 = brake
+        # immediately (old behaviour)
+        self.finish_overrun = finish_overrun
+        self.finishing = False
         # staleness gates are wall-clock; sim values absorb low RTF, the car
         # publishes SLAM at 50+ Hz so it gets much tighter ones
         self.path_stale_s = 2.0 if real_car else PATH_STALE_S
@@ -177,6 +187,13 @@ class PathFollower(Node):
         # On the real car the mission comes from the AMI selector switch, so
         # we never call set_mission — we only wait for AS:DRIVING.
         if not self.driving:
+            if self.require_ami and self.state and f'AMI:{self.require_ami}' not in self.state:
+                if 'AS:DRIVING' in self.state and now - self.last_log >= 5.0:
+                    self.last_log = now
+                    self.get_logger().warning(
+                        f'AS:DRIVING but AMI is not {self.require_ami} — not moving '
+                        f'(state: {self.state})')
+                return
             if 'AS:DRIVING' in self.state and self.pose is not None:
                 self.driving = True
                 self.start_xy = (self.pose[0], self.pose[1])
@@ -223,7 +240,18 @@ class PathFollower(Node):
             self.laps_done += 1
             self.get_logger().info(f'Lap {self.laps_done} complete')
             if self.laps_done >= self.target_laps:
-                self.braking = True
+                if self.finish_overrun > 0.0:
+                    self.finishing = True
+                    self.get_logger().info(
+                        f'final lap — driving {self.finish_overrun:.0f} m past the '
+                        f'start disc to clear the finish line before braking')
+                else:
+                    self.braking = True
+
+        # keep driving until the finish line is behind us, only then brake
+        if self.finishing and not self.braking and d_start >= self.finish_overrun:
+            self.braking = True
+            self.get_logger().info('finish line cleared — braking')
 
         if self.braking:
             self._publish_cmd(-2.0, 0.0)
@@ -268,10 +296,18 @@ def main():
     ap.add_argument('--real-car', action='store_true',
                     help='real car: no set_mission (AMI selector decides), '
                          'wall clock, speed fallback from /ros_can/twist')
+    ap.add_argument('--require-ami', type=str, default='',
+                    help='refuse to drive unless state_str shows this AMI '
+                         'mission (e.g. TRACKDRIVE); empty = any mission')
+    ap.add_argument('--finish-overrun', type=float, default=0.0,
+                    help='after the final lap, keep driving until this many '
+                         'metres from the start disc before braking, so the '
+                         'finish line is crossed first (D8.2.6); 0 = off')
     args = ap.parse_args()
 
     rclpy.init()
-    node = PathFollower(args.speed, args.laps, args.mission, real_car=args.real_car)
+    node = PathFollower(args.speed, args.laps, args.mission, real_car=args.real_car,
+                        require_ami=args.require_ami, finish_overrun=args.finish_overrun)
     try:
         while rclpy.ok() and not node.done:
             rclpy.spin_once(node, timeout_sec=0.1)

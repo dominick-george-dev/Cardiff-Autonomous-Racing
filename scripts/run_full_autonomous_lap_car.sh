@@ -76,8 +76,10 @@ echo "  /planned_path is live."
 
 echo "[6/6] Follower armed — select the mission on the AMI panel and start."
 echo "      The car drives when ros_can reports AS:DRIVING; EBS/RES stops it as normal."
+# FOLLOWER_EXTRA_ARGS: optional extra path_follower.py flags from the caller
+# (e.g. run_trackdrive_car.sh passes --require-ami / --finish-overrun)
 python3 "${REPO_ROOT}/scripts/path_follower.py" \
-    --real-car --laps "${LAPS}" --speed "${SPEED}" 2>&1 \
+    --real-car --laps "${LAPS}" --speed "${SPEED}" ${FOLLOWER_EXTRA_ARGS:-} 2>&1 \
   | tee "${LOG_DIR}/follower.log"
 
 grep -q 'FULL AUTONOMOUS LAP COMPLETE' "${LOG_DIR}/follower.log" \

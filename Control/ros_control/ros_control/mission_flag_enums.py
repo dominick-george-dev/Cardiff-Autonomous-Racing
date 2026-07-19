@@ -9,8 +9,9 @@ class AFlag(Enum):
     RIGHT = 1
     CENTRE = 2 #Centre the steering wheel
     ACCELERATE = 3 #Accelerate to 200rpm
-    BRAKE = 4 #Brake to complete stop
-    COMPLETE = 5 #Mission A has been complete
+    HOLD = 4 #Hold for 9.5 seconds
+    BRAKE = 5 #Brake to complete stop
+    COMPLETE = 6 #Mission A has been complete
 
 class BFlag(Enum):
     """

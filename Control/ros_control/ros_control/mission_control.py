@@ -194,6 +194,7 @@ class Mission_Control:
             steering_angle = 0.0
             if abs(current_state.steering_angle_rad) <= 0.01:
                 self.__static_A_flag = AFlag.ACCELERATE
+                self.timer_start = time.time()
         #wheels to 200rpm
         if self.__static_A_flag == AFlag.ACCELERATE:
             self.logger().info("Sub task: Accelerate to 200rpm")
@@ -202,7 +203,7 @@ class Mission_Control:
                 acceleration = 2.0
             else:
                 self.__static_A_flag = AFlag.HOLD
-                self.timer_start = time.time()
+                
 
         if self.__static_A_flag == AFlag.HOLD:
             self.logger().info("Hold for 10 seconds")

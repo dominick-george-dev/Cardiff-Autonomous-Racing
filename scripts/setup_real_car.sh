@@ -15,15 +15,16 @@
 set -o pipefail
 
 # ---------------------------------------------------------------------------
-# Configuration — confirm topic names on the day (ros2 topic list | grep zed)
+# Configuration — confirm topic names on the day: scripts/find_zed_topics.sh
+# discovers the real ones and prints the overrides to pass to this script.
 # ---------------------------------------------------------------------------
-RGB_TOPIC="/zed/zed_node/rgb/image_rect_color"
-DEPTH_TOPIC="/zed/zed_node/depth/depth_registered"
-CAMERA_INFO_TOPIC="/zed/zed_node/left/camera_info"
-IMU_TOPIC="/ros_can/imu"          # ADS-DV onboard IMU via ros_can
-CAMERA_X_OFFSET="0.0"             # metres forward of car reference — measure
-CAMERA_Y_OFFSET="0.0"             # metres left of car reference   — and edit!
-CAMERA_MODEL="zed2"
+RGB_TOPIC="${RGB_TOPIC:-/zed/zed_node/rgb/image_rect_color}"
+DEPTH_TOPIC="${DEPTH_TOPIC:-/zed/zed_node/depth/depth_registered}"
+CAMERA_INFO_TOPIC="${CAMERA_INFO_TOPIC:-/zed/zed_node/left/camera_info}"
+IMU_TOPIC="${IMU_TOPIC:-/ros_can/imu}"   # ADS-DV onboard IMU via ros_can
+CAMERA_X_OFFSET="${CAMERA_X_OFFSET:-0.0}"  # metres forward of car reference — measure
+CAMERA_Y_OFFSET="${CAMERA_Y_OFFSET:-0.0}"  # metres left of car reference   — and edit!
+CAMERA_MODEL="${CAMERA_MODEL:-zed2}"
 ZED_WS="$HOME/zed_ws"
 CAMERA_STARTUP_TIMEOUT=45         # s to wait for ZED topics after launch
 

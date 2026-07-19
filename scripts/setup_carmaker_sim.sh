@@ -6,9 +6,10 @@
 # started by whoever runs the rig; our job is just to build + launch
 # perception against whatever topics that bridge publishes.
 #
-# We don't yet know CarMaker's exact topic names, domain ID, or whether it
-# provides simulated camera/depth at all — CONFIRM ALL OF THE BELOW ON THE DAY
-# with `ros2 topic list` before trusting this script's defaults.
+# CONFIRMED (2026-07-17): CarMaker at the comp has no simulated camera/depth —
+# RUN_DETECTOR defaults to false below, running only landmark_slam +
+# cone_mapper against vehicle state. Topic names, domain ID, and RMW are
+# still unverified — CONFIRM ON THE DAY with `ros2 topic list`.
 #
 # Usage:
 #   ./setup_carmaker_sim.sh          build + launch perception
@@ -17,15 +18,15 @@
 set -o pipefail
 
 # ---------------------------------------------------------------------------
-# Configuration — CONFIRM ALL OF THIS ON THE DAY (ros2 topic list, ros2 doctor
-# --report for domain/RMW). Nothing here is verified against the real rig yet.
+# Configuration — CONFIRM ON THE DAY (ros2 topic list, ros2 doctor --report
+# for domain/RMW). Nothing here is verified against the real rig yet.
 # ---------------------------------------------------------------------------
 ROS_DOMAIN_ID_VAL=0                 # match whatever the CarMaker bridge uses
 RMW_IMPLEMENTATION_VAL=rmw_fastrtps_cpp
 
-# Set to false if CarMaker gives no simulated camera/depth — script will then
-# only run landmark_slam + cone_mapper against vehicle state, skipping the
-# detector entirely.
+# CarMaker at the comp has no simulated camera/depth (confirmed 2026-07-17) —
+# only landmark_slam + cone_mapper run, against vehicle state. Set back to
+# true only if a future rig turns out to provide camera/depth topics.
 RUN_DETECTOR=true
 
 RGB_TOPIC="/zed/zed_node/rgb/image_rect_color"
@@ -100,7 +101,7 @@ wait_for_topic() {
 # 3. Wait for CarMaker's own topics — this script does NOT start CarMaker or
 #    any bridge; that must already be running (rig operator's side).
 # ---------------------------------------------------------------------------
-step "Waiting for CarMaker vehicle-state topics"
+step "Waiting for CarMaker vehicle-state topics
 wait_for_topic "$IMU_TOPIC" \
   || die "$IMU_TOPIC never appeared — is CarMaker + its ROS2 bridge running? check ROS_DOMAIN_ID/RMW match"
 echo "  IMU topic up"

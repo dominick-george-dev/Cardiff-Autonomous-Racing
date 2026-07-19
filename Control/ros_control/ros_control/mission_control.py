@@ -3,7 +3,7 @@ from MPC.main import Model_Predictive_Control
 from model.vehical_model import Vehicle_State
 from nav_msgs.msg import Path
 from mission_flag_enums import *
-import math
+import math, time
 
 class Mission_Control:
     def __init__(self,mpc_unit:Model_Predictive_Control,timer_period:float,logger,trigger_ebs) -> None:
@@ -27,6 +27,8 @@ class Mission_Control:
 
         self.i = 0
         self.time_at_event_start = 0
+
+        self.timer_start = 0
     
 
     def reset_mission_progress(self):
@@ -199,7 +201,16 @@ class Mission_Control:
             if current_state.wheels_rpm < 200.0:
                 acceleration = 2.0
             else:
+                self.__static_A_flag = AFlag.HOLD
+                self.timer_start = time.time()
+
+        if self.__static_A_flag == AFlag.HOLD:
+            self.logger().info("Hold for 10 seconds")
+            self.logger().info(f"Current RPM: {current_state.wheels_rpm}")
+            
+            if time.time() - self.timer_start > 9.5:# if 10 seconds has passed
                 self.__static_A_flag = AFlag.BRAKE
+        
         #stop car
         if self.__static_A_flag == AFlag.BRAKE:
             self.logger().info("Sub task: Brake to zero")

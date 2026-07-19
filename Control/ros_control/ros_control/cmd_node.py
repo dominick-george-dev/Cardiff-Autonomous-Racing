@@ -42,7 +42,7 @@ class CmdNode(Node):
         self.alpha = 0.1  # smoothing factor for EMA, between 0 and 1
         self.filtered_rpm = 0.0
         self.filtered_steering_angle_rad = 0.0
-
+        self.driving_flag = False
         
         #self.steering_angle_rad = 0#current steering angle of wheels in radians (+ is left)
         #self.wheels_rpm = 0#current average rpm of all 4 wheels
@@ -121,6 +121,10 @@ class CmdNode(Node):
     #called whenever a msg is recieved
     def can_state_callback(self, msg:CanState):
         self.mission_controler.set_can_states(msg.ami_state,msg.as_state)
+        if msg.as_state == CanState.AS_DRIVING:
+            self.driving_flag = True
+        elif msg.as_state == CanState.AS_FINISHED:
+            self.driving_flag = False
         self.get_logger().info(f'Recieved: AMI:{msg.ami_state}, AS:{msg.as_state}')
 
     def wheel_speeds_callback(self,msg:WheelSpeedsStamped):
@@ -256,7 +260,7 @@ class CmdNode(Node):
         mission_msg.data = self.mission_controler.get_mission_complete()
 
         driving_flag_msg = std_msgs.msg.Bool()
-        driving_flag_msg.data = True
+        driving_flag_msg.data = self.driving_flag
 
         self.publisher_df.publish(driving_flag_msg)
         self.publisher_mf.publish(mission_msg)

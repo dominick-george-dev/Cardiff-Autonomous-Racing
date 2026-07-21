@@ -18,10 +18,12 @@ class BFlag(Enum):
     Represents the current progress of the static inspection B mission
     and what the vehicle's current objective is. 
     """
-    ACCELERATE = 0 #Accelerate to 50rpm
-    EMGCBRAKE = 1 #Activate emergency brake
-    WAIT_FOR_STOP = 2
-    COMPLETE = 3
+    TIMER_START = 0
+    ACCELERATE = 1 #Accelerate to 50rpm
+    HOLD = 2
+    EMGCBRAKE = 3 #Activate emergency brake
+    WAIT_FOR_STOP = 4
+    COMPLETE = 5
 
 class demoFlag(Enum):
     """

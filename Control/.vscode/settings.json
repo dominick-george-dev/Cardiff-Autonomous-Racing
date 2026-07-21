@@ -27,5 +27,6 @@
         "markdown": false,
         "scminput": false
     },
-    "ros.distro": "galactic"
+    "ros.distro": "galactic",
+    "ROS2.distro": "humble"
 }

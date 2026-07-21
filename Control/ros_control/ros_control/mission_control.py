@@ -29,15 +29,18 @@ class Mission_Control:
         self.time_at_event_start = 0
 
         self.timer_start = 0
+
+        self.previous_ami_state = CanState.AMI_NOT_SELECTED
     
 
     def reset_mission_progress(self):
         self.__static_A_flag = AFlag.LEFT
-        self.__static_B_flag = BFlag.ACCELERATE
+        self.__static_B_flag = BFlag.TIMER_START
         self.__autonomous_demo_flag = demoFlag.LEFT
         self.__skidpan_flag = SkidpanFlag.StraightToTimekeepingLine
         self.__accelFlag = accelFlag.ACCELERATE
         self.__autocrossFlag = autocrossFlag.START
+        self.__mission_complete = False
 
     def __acceleration(self,current_state:Vehicle_State,desired_path:Path) -> tuple[float, float]:
         acceleration = 0.0
@@ -200,16 +203,27 @@ class Mission_Control:
             self.logger().info("Sub task: Accelerate to 200rpm")
             self.logger().info(f"Current RPM: {current_state.wheels_rpm}")
             if current_state.wheels_rpm < 200.0:
-                acceleration = 2.0
+                acceleration = 0.25
             else:
                 self.__static_A_flag = AFlag.HOLD
                 
-
         if self.__static_A_flag == AFlag.HOLD:
             self.logger().info("Hold for 10 seconds")
             self.logger().info(f"Current RPM: {current_state.wheels_rpm}")
+            """if current_state.wheels_rpm < 195.0:
+                acceleration = 0.25
+            elif current_state.wheels_rpm < 205.0:
+                acceleration = 0.1
+            else:
+                acceleration = 0.0"""
+
+            if self.__static_A_flag == AFlag.HOLD:
+                rpm_error = 200.0 - current_state.wheels_rpm
+                kp = 0.01
+                acceleration = max(min(kp * rpm_error, 0.25), -0.1)
+
             
-            if time.time() - self.timer_start > 9.5:# if 10 seconds has passed
+            if time.time() - self.timer_start > 10:# if 10 seconds has passed
                 self.__static_A_flag = AFlag.BRAKE
         
         #stop car
@@ -217,7 +231,7 @@ class Mission_Control:
             self.logger().info("Sub task: Brake to zero")
             self.logger().info(f"Current RPM: {current_state.wheels_rpm}")
 
-            acceleration = -4.0
+            acceleration = -2.0
             if current_state.wheels_rpm <= 0.1:
                 self.__static_A_flag = AFlag.COMPLETE
         # set AS_FINISHED
@@ -232,12 +246,26 @@ class Mission_Control:
     def __static_B(self,current_state:Vehicle_State) -> tuple[float, float]:
         acceleration = 0.0
         steering_angle = 0.0
+
+        if self.__static_B_flag == BFlag.TIMER_START:
+            self.timer_start = time.time()
+            self.__static_B_flag = BFlag.ACCELERATE
+
         if self.__static_B_flag == BFlag.ACCELERATE:
             self.logger().info("Sub task: accelerate to 50rpm")
             if current_state.wheels_rpm < 50.0:
-                acceleration = 20.0
+                acceleration = 0.1
             else:
+                self.__static_B_flag = BFlag.HOLD
+        
+        if self.__static_B_flag == BFlag.HOLD:
+            rpm_error = 50.0 - current_state.wheels_rpm
+            kp = 0.01
+            acceleration = max(min(kp * rpm_error, 0.25), -0.1)
+
+            if time.time() - self.timer_start > 8:
                 self.__static_B_flag = BFlag.EMGCBRAKE
+
 
         if self.__static_B_flag == BFlag.EMGCBRAKE:
             self.trigger_ebs()
@@ -304,6 +332,10 @@ class Mission_Control:
     def set_can_states(self,AMI:CanState.ami_state,AS:CanState.ami_state):
         self.__ami_state = AMI
         self.__as_state = AS
+
+        if self.__ami_state != self.previous_ami_state:
+            self.reset_mission_progress()
+            self.previous_ami_state = AMI
 
     def get_message(self,current_state:Vehicle_State,desired_path:Path=None) -> tuple[float, float]:
         self.i+=1

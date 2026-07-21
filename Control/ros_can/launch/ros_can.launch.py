@@ -22,7 +22,7 @@ def generate_launch_description():
             {"max_braking": 5.0},
             {"cmd_timeout": 0.5}
         ],
-        arguments=['--ros-args', '--log-level', 'info'],
+        arguments=['--ros-args', '--log-level', 'debug'],
     )
 
     ld = LaunchDescription()

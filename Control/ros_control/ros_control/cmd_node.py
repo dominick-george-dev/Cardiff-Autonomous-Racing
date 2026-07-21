@@ -137,7 +137,7 @@ class CmdNode(Node):
         rf = wheels.rf_speed
         # in RADIANS
         steering = wheels.steering
-        self.current_state.wheels_rpm = (lb+lf+rb+rf)/4
+        self.current_state.wheels_rpm = (rb+lb)/2
         if self.eufs_sim_type == 1:
             # there is a bug where the rpm is always 500 less then reality
             self.current_state.wheels_rpm -= 500

@@ -1,0 +1,2 @@
+#!/bin/bash
+colcon build --symlink-install --packages-select ros_can ros_control eufs_msgs

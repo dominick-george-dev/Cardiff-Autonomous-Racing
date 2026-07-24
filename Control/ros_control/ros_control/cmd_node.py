@@ -20,7 +20,7 @@ import numpy as np
 from MPC.main import Model_Predictive_Control
 from model.vehical_model import Vehicle_Input, Vehicle_State, Vehicle_Constants
 
-from Control.ros_control.ros_control.mission_controller import Mission_Controller
+from Control.ros_control.ros_control.mission_control.mission_controller import Mission_Controller
 class CmdNode(Node):
 
     def __init__(self):

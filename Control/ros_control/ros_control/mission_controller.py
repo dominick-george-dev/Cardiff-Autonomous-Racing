@@ -34,6 +34,35 @@ class Mission_Controller:
     def reset_mission_progress(self):
         self.current_mission.reset()
 
+    def set_mission(self, AMI:CanState.ami_state):
+        # choose mission based on new AMI
+        if AMI == CanState.AMI_DDT_INSPECTION_A:
+            self.current_mission = Static_A(logger=self.logger, trigger_ebs=self.trigger_ebs)
+            self.logger().info(f"Mission switched to AMI: {AMI}, Static A")
+        elif AMI == CanState.AMI_DDT_INSPECTION_B:
+            self.current_mission = Static_B(logger=self.logger, trigger_ebs=self.trigger_ebs)
+            self.logger().info(f"Mission switched to AMI: {AMI}, Static B")
+        elif AMI == CanState.AMI_AUTONOMOUS_DEMO:
+            self.current_mission = Autonomous_Demo(logger=self.logger, trigger_ebs=self.trigger_ebs, timer_period=self.timer_period)
+            self.logger().info(f"Mission switched to AMI: {AMI}, Autonomous Demo")
+        elif AMI == CanState.AMI_AUTOCROSS:
+            self.current_mission = Autocross(logger=self.logger, trigger_ebs=self.trigger_ebs, timer_period=self.timer_period)
+            self.logger().info(f"Mission switched to AMI: {AMI}, Autocross")
+        elif AMI == CanState.AMI_ACCELERATION:
+            self.current_mission = Acceleration(logger=self.logger, trigger_ebs=self.trigger_ebs, timer_period=self.timer_period, mpc_unit=self.mpc_unit)
+            self.logger().info(f"Mission switched to AMI: {AMI}, Acceleration")
+        elif AMI == CanState.AMI_SKIDPAD:
+            self.current_mission = Skidpad(logger=self.logger, trigger_ebs=self.trigger_ebs, timer_period=self.timer_period, mpc_unit=self.mpc_unit)
+            self.logger().info(f"Mission switched to AMI: {AMI}, Skidpad")
+        elif AMI == CanState.AMI_TRACK_DRIVE:
+            self.current_mission = Trackdrive(logger=self.logger, trigger_ebs=self.trigger_ebs, timer_period=self.timer_period, mpc_unit=self.mpc_unit)
+            self.logger().info(f"Mission switched to AMI: {AMI}, Trackdrive")
+        elif AMI == CanState.AMI_NOT_SELECTED:
+            self.current_mission = None
+            self.logger().info(f"Mission switched to AMI: {AMI}, Mission Not Selected")
+        else:
+            self.current_mission = None
+            self.logger().warn(f"Attempted to switch to unknown mission, AMI: {AMI}. Switching to mission: None")
 
     def set_can_states(self,AMI:CanState.ami_state,AS:CanState.ami_state):
         self.__ami_state = AMI
@@ -43,34 +72,9 @@ class Mission_Controller:
             self.reset_mission_progress()
             self.previous_ami_state = AMI
 
-            # choose mission bsaed on new AMI
-            if AMI == CanState.AMI_DDT_INSPECTION_A:
-                self.current_mission = Static_A(logger=self.logger, trigger_ebs=self.trigger_ebs)
-                self.logger().info(f"Mission switched to AMI: {AMI}, Static A")
-            elif AMI == CanState.AMI_DDT_INSPECTION_B:
-                self.current_mission = Static_B(logger=self.logger, trigger_ebs=self.trigger_ebs)
-                self.logger().info(f"Mission switched to AMI: {AMI}, Static B")
-            elif AMI == CanState.AMI_AUTONOMOUS_DEMO:
-                self.current_mission = Autonomous_Demo(logger=self.logger, trigger_ebs=self.trigger_ebs, timer_period=self.timer_period)
-                self.logger().info(f"Mission switched to AMI: {AMI}, Autonomous Demo")
-            elif AMI == CanState.AMI_AUTOCROSS:
-                self.current_mission = Autocross(logger=self.logger, trigger_ebs=self.trigger_ebs, timer_period=self.timer_period)
-                self.logger().info(f"Mission switched to AMI: {AMI}, Autocross")
-            elif AMI == CanState.AMI_ACCELERATION:
-                self.current_mission = Acceleration(logger=self.logger, trigger_ebs=self.trigger_ebs, timer_period=self.timer_period, mpc_unit=self.mpc_unit)
-                self.logger().info(f"Mission switched to AMI: {AMI}, Acceleration")
-            elif AMI == CanState.AMI_SKIDPAD:
-                self.current_mission = Skidpad(logger=self.logger, trigger_ebs=self.trigger_ebs, timer_period=self.timer_period, mpc_unit=self.mpc_unit)
-                self.logger().info(f"Mission switched to AMI: {AMI}, Skidpad")
-            elif AMI == CanState.AMI_TRACK_DRIVE:
-                self.current_mission = Trackdrive(logger=self.logger, trigger_ebs=self.trigger_ebs, timer_period=self.timer_period, mpc_unit=self.mpc_unit)
-                self.logger().info(f"Mission switched to AMI: {AMI}, Trackdrive")
-            elif AMI == CanState.AMI_NOT_SELECTED:
-                self.current_mission = None
-                self.logger().info(f"Mission switched to AMI: {AMI}, Mission Not Selected")
-            else:
-                self.current_mission = None
-                self.logger().warn(f"Attempted to switch to unknown mission, AMI: {AMI}. Switching to mission: None")
+            self.set_mission(AMI)
+
+            
 
     def get_message(self,current_state:Vehicle_State,desired_path:Path=None) -> tuple[float, float]:
 

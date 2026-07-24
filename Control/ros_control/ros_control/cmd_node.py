@@ -20,7 +20,7 @@ import numpy as np
 from MPC.main import Model_Predictive_Control
 from model.vehical_model import Vehicle_Input, Vehicle_State, Vehicle_Constants
 
-from mission_control import Mission_Control
+from Control.ros_control.ros_control.mission_controller import Mission_Controller
 class CmdNode(Node):
 
     def __init__(self):
@@ -83,10 +83,8 @@ class CmdNode(Node):
             self.ebs_client = self.create_client(Trigger, "ros_can/ebs")
 
         self.current_state = Vehicle_State(x_pos=0.0, y_pos=0.0, yaw_angle=0.0, x_speed=0.0, y_speed=0.0, yaw_rate=0.0)
-        
-        #self.mission_complete_pub = self.create_publisher(std_msgs.msg.Bool, 'ros_control/mission_complete', 10)
 
-        self.mission_controler = Mission_Control(mpc_unit=Model_Predictive_Control(self.timer_period,5.0),timer_period=self.timer_period,logger=self.get_logger,trigger_ebs=self.trigger_ebs)
+        self.mission_controler = Mission_Controller(mpc_unit=Model_Predictive_Control(self.timer_period,5.0),timer_period=self.timer_period,logger=self.get_logger,trigger_ebs=self.trigger_ebs)
 
         self.get_logger().info("Initialization complete")
     

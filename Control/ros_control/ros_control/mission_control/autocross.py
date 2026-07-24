@@ -7,8 +7,6 @@ from nav_msgs.msg import Path
 
 class Autocross(Mission):
 
-    complete = False
-
     class autocrossFlag(Enum):
         """
         Represents the current progress of the Autocross mission
@@ -64,9 +62,3 @@ class Autocross(Mission):
 
 
         return acceleration, steering_angle
-        
-
-
-    def is_complete(self):
-        return self.complete
-

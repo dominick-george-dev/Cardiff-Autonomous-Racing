@@ -9,8 +9,6 @@ from MPC.main import Model_Predictive_Control
 
 class Trackdrive(Mission):
 
-    complete = False
-
     class TrackdriveFlag(Enum):
         """
         Represents the current progress of the Trackdrive mission
@@ -32,7 +30,3 @@ class Trackdrive(Mission):
 
     def get_commands(self,current_state:Vehicle_State, desired_path:Path):
         return 0.0,0.0
-
-    def is_complete(self):
-        return self.complete
-

@@ -7,9 +7,7 @@ from model.vehical_model import Vehicle_State, Vehicle_Input
 from nav_msgs.msg import Path
 from MPC.main import Model_Predictive_Control
 
-class Skidpan(Mission):
-
-    complete = False
+class Skidpad(Mission):
 
     class SkidpanFlag(Enum):
         """
@@ -67,8 +65,3 @@ class Skidpan(Mission):
 
 
         return acceleration, steering_angle
-
-
-    def is_complete(self):
-        return self.complete
-

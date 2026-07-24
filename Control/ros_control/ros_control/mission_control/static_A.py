@@ -7,8 +7,6 @@ from nav_msgs.msg import Path
 
 class Static_A(Mission):
 
-    complete = False
-
     class AFlag(Enum):
         """
         Represents the current progress of the static inspection A mission
@@ -98,8 +96,3 @@ class Static_A(Mission):
             #self.logger().info("Mission complete published!")
         
         return float(acceleration), float(steering_angle)
-
-
-    def is_complete(self):
-        return self.complete
-

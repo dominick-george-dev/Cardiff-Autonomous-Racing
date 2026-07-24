@@ -9,8 +9,6 @@ from MPC.main import Model_Predictive_Control
 
 class Acceleration(Mission):
 
-    complete = False
-
     class accelFlag(Enum):
         """
         Represents the current progress of the Accelleration
@@ -89,7 +87,3 @@ class Acceleration(Mission):
         # #self.logger().info(f'Publishing: "{msg.drive}"')
         # #self.logger().info(f'Publishing: "{msg.drive}" \n & {msg.header}')
         return float(acceleration),float(steering_angle)
-
-    def is_complete(self):
-        return self.complete
-

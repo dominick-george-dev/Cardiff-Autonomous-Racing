@@ -7,8 +7,6 @@ from nav_msgs.msg import Path
 
 class Autonomous_Demo(Mission):
 
-    complete = False
-
     class demoFlag(Enum):
         """
         Represents the current progress of the autonomous demonstration
@@ -81,9 +79,3 @@ class Autonomous_Demo(Mission):
             self.progress_flag = self.demoFlag.LEFT
         
         return float(acceleration),float(steering_angle)
-        
-
-
-    def is_complete(self):
-        return self.complete
-

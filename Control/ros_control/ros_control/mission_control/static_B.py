@@ -7,8 +7,6 @@ from nav_msgs.msg import Path
 
 class Static_B(Mission):
 
-    complete = False
-
     class BFlag(Enum):
         """
         Represents the current progress of the static inspection B mission
@@ -62,9 +60,3 @@ class Static_B(Mission):
                 self.progress_flag = self.BFlag.ACCELERATE
         
         return float(acceleration), float(steering_angle)
-
-
-
-    def is_complete(self):
-        return self.complete
-

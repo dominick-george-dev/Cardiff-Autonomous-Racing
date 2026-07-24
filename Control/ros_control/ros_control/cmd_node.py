@@ -121,7 +121,7 @@ class CmdNode(Node):
         self.mission_controler.set_can_states(msg.ami_state,msg.as_state)
         if msg.as_state == CanState.AS_DRIVING:
             self.driving_flag = True
-        elif msg.as_state == CanState.AS_FINISHED:
+        else:
             self.driving_flag = False
         self.get_logger().info(f'Recieved: AMI:{msg.ami_state}, AS:{msg.as_state}')
 

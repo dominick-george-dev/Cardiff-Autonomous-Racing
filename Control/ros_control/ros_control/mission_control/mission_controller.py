@@ -24,8 +24,6 @@ class Mission_Controller:
         self.logger = logger#ros2 logger passed through from cmd node
         self.trigger_ebs = trigger_ebs# trigger ebs function passed through from cmd node
 
-
-        self.previous_ami_state = CanState.AMI_NOT_SELECTED
         self.current_mission = None
     
 
@@ -63,15 +61,14 @@ class Mission_Controller:
             self.logger().warn(f"Attempted to switch to unknown mission, AMI: {AMI}. Switching to mission: None")
 
     def set_can_states(self,AMI:CanState.ami_state,AS:CanState.ami_state):
-        self.__ami_state = AMI
-        self.__as_state = AS
 
-        if self.__ami_state != self.previous_ami_state: # if mission has changed
+        if self.__ami_state != AMI: # if mission has changed
             self.reset_mission_progress()
-            self.previous_ami_state = AMI
 
             self.set_mission(AMI)
-
+        
+        self.__ami_state = AMI
+        self.__as_state = AS
             
 
     def get_message(self,current_state:Vehicle_State,desired_path:Path=None) -> tuple[float, float]:

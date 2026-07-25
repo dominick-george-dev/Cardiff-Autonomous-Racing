@@ -78,7 +78,7 @@ class Mission_Controller:
             return 0.0, 0.0
 
         # if the current mission is not complete, and we are allowed to drive: get commands to send to the car
-        if (not self.current_mission.is_complete()) and self.__as_state == CanState.AS_DRIVING:
+        if (not self.get_mission_complete()) and self.__as_state == CanState.AS_DRIVING:
             return self.current_mission.get_commands(current_state=current_state, desired_path=desired_path)
         else:
             return 0.0, 0.0

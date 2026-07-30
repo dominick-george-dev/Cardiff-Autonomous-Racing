@@ -89,7 +89,3 @@ class Mission_Controller:
             return False
         else:
             return self.current_mission.is_complete()
-
-if __name__ == "__main__":
-    mission_controler = Mission_Controller()
-    print(mission_controler.get_message())

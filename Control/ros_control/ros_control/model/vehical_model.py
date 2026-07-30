@@ -24,7 +24,7 @@ class Vehicle_Constants():
 
 
 class Vehicle_State():
-    def __init__(self,x_pos=0, y_pos=0, x_speed=0, y_speed=0, yaw_angle=0, yaw_rate=0, wheel_rpm=0,steering_angle_rad=0):
+    def __init__(self,x_pos=0.0, y_pos=0.0, x_speed=0.0, y_speed=0.0, yaw_angle=0.0, yaw_rate=0.0, wheel_rpm=0.0,steering_angle_rad=0.0):
         # 2D position
         self.xpos = x_pos
         self.ypos = y_pos
@@ -45,7 +45,7 @@ class Vehicle_State():
 
 
 class Vehicle_Input():
-    def __init__(self, acceleration=0, steering_angle=0):
+    def __init__(self, acceleration=0.0, steering_angle=0.0):
         self.acceleration = acceleration # pedal
         self.steering_angle = steering_angle # steer
 

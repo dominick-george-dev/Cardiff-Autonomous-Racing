@@ -1,7 +1,8 @@
 from enum import Enum
+from typing import Optional
 
 
-from mission import Mission
+from mission_control.mission import Mission
 from model.vehical_model import Vehicle_State
 from nav_msgs.msg import Path
 
@@ -30,9 +31,15 @@ class Autocross(Mission):
         self.timer_period = timer_period
 
 
-    def get_commands(self,current_state:Vehicle_State, desired_path:Path):
+    def get_commands(self,current_state:Vehicle_State, desired_path: Optional[Path] = None):
         acceleration = 0.0
         steering_angle = 0.0
+
+        # Make sure there is a path
+        if desired_path == None:
+            self.logger().error("No path given, commands 0, 0 sent")
+            return acceleration, steering_angle
+
         self.logger().info("AS_Driving")
         #accelerate to start line
         if self.progress_flag == self.autocrossFlag.START:

@@ -1,9 +1,10 @@
 from enum import Enum
 import time
+from typing import Optional
 from nav_msgs.msg import Path
 
 
-from mission import Mission
+from mission_control.mission import Mission
 from model.vehical_model import Vehicle_State
 
 
@@ -27,7 +28,7 @@ class Static_B(Mission):
         self.timer_start = 0
         self.progress_flag = self.BFlag.LEFT
 
-    def get_commands(self,current_state:Vehicle_State, desired_path:Path= None):
+    def get_commands(self,current_state:Vehicle_State, desired_path: Optional[Path] = None):
         acceleration = 0.0
         steering_angle = 0.0
 

@@ -1,8 +1,9 @@
 from enum import Enum
+from typing import Optional
 from nav_msgs.msg import Path
 
 
-from mission import Mission
+from mission_control.mission import Mission
 from model.vehical_model import Vehicle_State
 from MPC.main import Model_Predictive_Control
 
@@ -27,5 +28,5 @@ class Trackdrive(Mission):
         self.mpc_unit = mpc_unit
 
 
-    def get_commands(self,current_state:Vehicle_State, desired_path:Path):
+    def get_commands(self,current_state:Vehicle_State, desired_path: Optional[Path] = None):
         return 0.0,0.0

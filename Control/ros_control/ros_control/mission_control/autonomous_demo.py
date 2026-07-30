@@ -1,7 +1,8 @@
 from enum import Enum
+from typing import Optional
 
 
-from mission import Mission
+from mission_control.mission import Mission
 from model.vehical_model import Vehicle_State
 from nav_msgs.msg import Path
 
@@ -31,7 +32,7 @@ class Autonomous_Demo(Mission):
         self.timer_period = timer_period
 
 
-    def get_commands(self,current_state:Vehicle_State, desired_path:Path= None):
+    def get_commands(self,current_state:Vehicle_State, desired_path: Optional[Path] = None):
         acceleration = 0.0
         steering_angle = 0.0
         #steering left and right and return to straight

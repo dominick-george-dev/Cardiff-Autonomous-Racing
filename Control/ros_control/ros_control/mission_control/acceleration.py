@@ -1,9 +1,10 @@
 from enum import Enum
 import math
+from typing import Optional
 from nav_msgs.msg import Path
 
 
-from mission import Mission
+from mission_control.mission import Mission
 from model.vehical_model import Vehicle_State
 from MPC.main import Model_Predictive_Control
 
@@ -31,10 +32,16 @@ class Acceleration(Mission):
         self.mpc_unit = mpc_unit
 
 
-    def get_commands(self,current_state:Vehicle_State, desired_path:Path):
+    def get_commands(self,current_state:Vehicle_State, desired_path: Optional[Path] = None):
+        #set default commands
         acceleration = 0.0
         steering_angle = 0.0
-        # msg.drive.speed=10.0    
+
+        # Make sure there is a path
+        if desired_path == None:
+            self.logger().error("No path given, commands 0, 0 sent")
+            return acceleration, steering_angle
+        
         self.logger().info("AS_Driving")
         # accelerate along path
         if self.progress_flag == self.accelFlag.ACCELERATE:
@@ -43,8 +50,8 @@ class Acceleration(Mission):
             if distance_travelled < 75:
                 try:
                     commands = self.mpc_unit.main(initial_state=current_state,required_path=desired_path)#get required path from path planning, not sure where to get initial state from
-                    acceleration = commands.acceleration 
-                    steering_angle = commands.steering_angle
+                    acceleration = commands[0].acceleration 
+                    steering_angle = commands[0].steering_angle
                 except Exception as e:
                     acceleration = 0.0
                     steering_angle = 0.0
@@ -56,8 +63,8 @@ class Acceleration(Mission):
             try:
                 commands = self.mpc_unit.main(initial_state=current_state,required_path=desired_path)#let mpc brake and make any steering adjustments needed
                 #cost function will need to now reward braking and massivly penalise accelerating or high speeds
-                acceleration = commands.acceleration 
-                steering_angle = commands.steering_angle
+                acceleration = commands[0].acceleration 
+                steering_angle = commands[0].steering_angle
             except Exception as e:
                 acceleration = -3.0 #might need to be increased
                 steering_angle = 0.0

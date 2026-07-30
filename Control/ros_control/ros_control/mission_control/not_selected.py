@@ -9,8 +9,8 @@ from MPC.main import Model_Predictive_Control
 class NotSelected(Mission):
 
 
-    def __init__(self, logger, trigger_ebs):
-        super().__init__(logger=logger, trigger_ebs=trigger_ebs)
+    def __init__(self, trigger_ebs):
+        super().__init__(trigger_ebs=trigger_ebs)
 
 
     def get_commands(self,current_state:Vehicle_State, desired_path: Optional[Path] = None):

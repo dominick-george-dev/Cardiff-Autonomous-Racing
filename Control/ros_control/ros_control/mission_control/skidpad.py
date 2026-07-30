@@ -19,8 +19,8 @@ class Skidpad(Mission):
         Left = 2
         StopInZone = 3
 
-    def __init__(self, logger, trigger_ebs, timer_period, mpc_unit:Model_Predictive_Control):
-        super().__init__(logger=logger, trigger_ebs=trigger_ebs)
+    def __init__(self, trigger_ebs, timer_period, mpc_unit:Model_Predictive_Control):
+        super().__init__(trigger_ebs=trigger_ebs)
 
         self.timer_start = 0
         self.progress_flag = self.SkidpanFlag.StraightToTimekeepingLine
@@ -32,14 +32,14 @@ class Skidpad(Mission):
 
 
     def get_commands(self,current_state:Vehicle_State, desired_path: Optional[Path] = None):
-        self.logger().info("AS_Skidpan")
+        self.logger.info("AS_Skidpan")
 
         acceleration = 0.0
         steering_angle = 0.0
 
         # Make sure there is a path
         if desired_path == None:
-            self.logger().error("No path given, commands 0, 0 sent")
+            self.logger.error("No path given, commands 0, 0 sent")
             return acceleration, steering_angle
 
         if self.progress_flag == self.SkidpanFlag.StraightToTimekeepingLine:

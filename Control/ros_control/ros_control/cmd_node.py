@@ -84,7 +84,7 @@ class CmdNode(Node):
 
         self.current_state = Vehicle_State(x_pos=0.0, y_pos=0.0, yaw_angle=0.0, x_speed=0.0, y_speed=0.0, yaw_rate=0.0)
 
-        self.mission_controler = Mission_Controller(mpc_unit=Model_Predictive_Control(self.timer_period,5.0),timer_period=self.timer_period,logger=self.get_logger,trigger_ebs=self.trigger_ebs)
+        self.mission_controler = Mission_Controller(mpc_unit=Model_Predictive_Control(self.timer_period,5.0),timer_period=self.timer_period,trigger_ebs=self.trigger_ebs)
 
         self.get_logger().info("Initialization complete")
     

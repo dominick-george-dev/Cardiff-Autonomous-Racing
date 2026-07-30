@@ -22,8 +22,8 @@ class Static_B(Mission):
         WAIT_FOR_STOP = 4
         COMPLETE = 5
 
-    def __init__(self, logger, trigger_ebs):
-        super().__init__(logger=logger, trigger_ebs=trigger_ebs)
+    def __init__(self, trigger_ebs):
+        super().__init__(trigger_ebs=trigger_ebs)
 
         self.timer_start = 0
         self.progress_flag = self.BFlag.TIMER_START
@@ -37,7 +37,7 @@ class Static_B(Mission):
             self.progress_flag = self.BFlag.ACCELERATE
 
         if self.progress_flag == self.BFlag.ACCELERATE:
-            self.logger().info("Sub task: accelerate to 50rpm")
+            self.logger.info("Sub task: accelerate to 50rpm")
             if current_state.wheels_rpm < 50.0:
                 acceleration = 0.1
             else:

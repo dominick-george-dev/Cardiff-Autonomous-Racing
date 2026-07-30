@@ -20,8 +20,8 @@ class Acceleration(Mission):
         BRAKE = 1
         COMPLETE = 2
 
-    def __init__(self, logger, trigger_ebs, timer_period, mpc_unit:Model_Predictive_Control):
-        super().__init__(logger=logger, trigger_ebs=trigger_ebs)
+    def __init__(self, trigger_ebs, timer_period, mpc_unit:Model_Predictive_Control):
+        super().__init__(trigger_ebs=trigger_ebs)
 
         self.timer_start = 0
         self.progress_flag = self.accelFlag.ACCELERATE
@@ -39,13 +39,13 @@ class Acceleration(Mission):
 
         # Make sure there is a path
         if desired_path == None:
-            self.logger().error("No path given, commands 0, 0 sent")
+            self.logger.error("No path given, commands 0, 0 sent")
             return acceleration, steering_angle
         
-        self.logger().info("AS_Driving")
+        self.logger.info("AS_Driving")
         # accelerate along path
         if self.progress_flag == self.accelFlag.ACCELERATE:
-            self.logger().info("Sub task: Accelerate")
+            self.logger.info("Sub task: Accelerate")
             distance_travelled = math.sqrt(current_state.xpos**2 + current_state.ypos**2) #distance to origin (0,0)
             if distance_travelled < 75:
                 try:
@@ -59,7 +59,7 @@ class Acceleration(Mission):
                 self.progress_flag = self.accelFlag.BRAKE
         #Brake after 75m travelled 
         if self.progress_flag == self.accelFlag.BRAKE: 
-            self.logger().info("Sub task: Brake")
+            self.logger.info("Sub task: Brake")
             try:
                 commands = self.mpc_unit.main(initial_state=current_state,required_path=desired_path)#let mpc brake and make any steering adjustments needed
                 #cost function will need to now reward braking and massivly penalise accelerating or high speeds

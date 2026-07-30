@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Optional
 from nav_msgs.msg import Path
+import rclpy.logging
 
 
 from model.vehical_model import Vehicle_State
@@ -11,10 +12,10 @@ class Mission(ABC):
     progress_flag = 0
     complete = False
 
-    def __init__(self, logger, trigger_ebs):
+    def __init__(self, trigger_ebs):
         super().__init__()
 
-        self.logger = logger#ros2 logger passed through from cmd node
+        self.logger = rclpy.logging.get_logger("ros_control.Mission_Controller").get_child("Mission")#ros2 logger
         self.trigger_ebs = trigger_ebs# trigger ebs function passed through from cmd node
 
     def reset(self):

@@ -16,8 +16,8 @@ class Trackdrive(Mission):
         """
         TEMP = 0
 
-    def __init__(self, logger, trigger_ebs, timer_period, mpc_unit:Model_Predictive_Control):
-        super().__init__(logger=logger, trigger_ebs=trigger_ebs)
+    def __init__(self, trigger_ebs, timer_period, mpc_unit:Model_Predictive_Control):
+        super().__init__(trigger_ebs=trigger_ebs)
 
         self.timer_start = 0
         self.progress_flag = self.TrackdriveFlag.TEMP

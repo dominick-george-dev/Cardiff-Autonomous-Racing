@@ -11,6 +11,8 @@ from mission_control.autocross import Autocross
 from mission_control.acceleration import Acceleration
 from mission_control.skidpad import Skidpad
 from mission_control.trackdrive import Trackdrive
+from mission_control.not_selected import NotSelected
+from mission_control.mission import Mission
 
 class Mission_Controller:
     def __init__(self,mpc_unit:Model_Predictive_Control,timer_period:float,logger,trigger_ebs) -> None:
@@ -24,7 +26,7 @@ class Mission_Controller:
         self.logger = logger#ros2 logger passed through from cmd node
         self.trigger_ebs = trigger_ebs# trigger ebs function passed through from cmd node
 
-        self.current_mission = None
+        self.current_mission:Mission = NotSelected(logger=logger,trigger_ebs=trigger_ebs)
     
 
     def reset_mission_progress(self):
@@ -54,11 +56,11 @@ class Mission_Controller:
             self.current_mission = Trackdrive(logger=self.logger, trigger_ebs=self.trigger_ebs, timer_period=self.timer_period, mpc_unit=self.mpc_unit)
             self.logger().info(f"Mission switched to AMI: {AMI}, Trackdrive")
         elif AMI == CanState.AMI_NOT_SELECTED:
-            self.current_mission = None
-            self.logger().info(f"Mission switched to AMI: {AMI}, Mission Not Selected")
+            self.current_mission = NotSelected(logger=self.logger,trigger_ebs=self.trigger_ebs)
+            self.logger().info(f"Mission switched to AMI: {AMI}, NotSelected")
         else:
-            self.current_mission = None
-            self.logger().warn(f"Attempted to switch to unknown mission, AMI: {AMI}. Switching to mission: None")
+            self.current_mission = NotSelected(logger=self.logger,trigger_ebs=self.trigger_ebs)
+            self.logger().warn(f"Attempted to switch to unknown mission, AMI: {AMI}. Switching to mission: NotSelected")
 
     def set_can_states(self,AMI:CanState.ami_state,AS:CanState.ami_state):
 

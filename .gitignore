@@ -2,12 +2,10 @@
 build/
 install/
 log/
-<<<<<<< HEAD
 logs/
 .vscode/
 Control/logs/
 presentation_graphics
-=======
 *.bag
 *.bag.active
 *.db3
@@ -186,4 +184,3 @@ pip-delete-this-directory.txt
 scratch/
 temp/
 tmp/
->>>>>>> path-planning-development

@@ -26,7 +26,7 @@ class Static_B(Mission):
         super().__init__(logger=logger, trigger_ebs=trigger_ebs)
 
         self.timer_start = 0
-        self.progress_flag = self.BFlag.LEFT
+        self.progress_flag = self.BFlag.TIMER_START
 
     def get_commands(self,current_state:Vehicle_State, desired_path: Optional[Path] = None):
         acceleration = 0.0

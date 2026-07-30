@@ -1,3 +1,5 @@
+from typing import Optional
+
 from eufs_msgs.msg import CanState
 from nav_msgs.msg import Path
 
@@ -73,7 +75,7 @@ class Mission_Controller:
         self.__as_state = AS
             
 
-    def get_message(self,current_state:Vehicle_State,desired_path:Path=None) -> tuple[float, float]:
+    def get_message(self,current_state:Vehicle_State, desired_path: Optional[Path] = None) -> tuple[float, float]:
 
         # if not on a mission do not drive the car
         if self.current_mission == None:

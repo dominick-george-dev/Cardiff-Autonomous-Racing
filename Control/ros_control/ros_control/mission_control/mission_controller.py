@@ -34,7 +34,7 @@ class Mission_Controller:
     def reset_mission_progress(self):
         self.current_mission.reset()
 
-    def set_mission(self, AMI:CanState.ami_state):
+    def set_mission(self, AMI:int):
         # choose mission based on new AMI
         if AMI == CanState.AMI_DDT_INSPECTION_A:
             self.current_mission = Static_A(logger=self.logger, trigger_ebs=self.trigger_ebs)
@@ -64,7 +64,7 @@ class Mission_Controller:
             self.current_mission = NotSelected(logger=self.logger,trigger_ebs=self.trigger_ebs)
             self.logger().warn(f"Attempted to switch to unknown mission, AMI: {AMI}. Switching to mission: NotSelected")
 
-    def set_can_states(self,AMI:CanState.ami_state,AS:CanState.ami_state):
+    def set_can_states(self,AMI:int,AS:int):
 
         if self.__ami_state != AMI: # if mission has changed
             self.reset_mission_progress()

@@ -20,7 +20,7 @@ import numpy as np
 from MPC.main import Model_Predictive_Control
 from model.vehical_model import Vehicle_State, Vehicle_Constants
 
-from Control.ros_control.ros_control.mission_control.mission_controller import Mission_Controller
+from mission_control.mission_controller import Mission_Controller
 class CmdNode(Node):
 
     def __init__(self):
@@ -137,8 +137,8 @@ class CmdNode(Node):
         steering = wheels.steering
         self.current_state.wheels_rpm = (rb+lb)/2
         if self.eufs_sim_type == 1:
-            # there is a bug where the rpm is always 500 less then reality
-            self.current_state.wheels_rpm -= 500
+            """# there is a bug where the rpm is always 500 less then reality
+            self.current_state.wheels_rpm -= 500"""
             steering*=-1
         elif self.eufs_sim_type == 2:
             # eufs sim 2 uses m/s rather than rpm in the msg, so convert

@@ -99,18 +99,15 @@ class CmdNode(Node):
         #rclpy.spin_until_future_complete(self, future)
         
     
-    def ebs_response_callback(self, future:rclpy.Future) -> bool:
+    def ebs_response_callback(self, future:rclpy.Future):
         try:
             result = future.result()
             if result.success:
                 self.get_logger().info('EBS triggered successfully!')
-                return True
             else:
                 self.get_logger().error(f'Failed to trigger EBS! {result.message}')
-                return False
         except Exception as e:
             self.get_logger().error(f"Service call failed {e}")
-            return False
 
     def odometry_callback(self,msg:Odometry):
         self.set_current_state(odometry=msg)

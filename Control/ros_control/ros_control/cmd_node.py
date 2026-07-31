@@ -102,6 +102,11 @@ class CmdNode(Node):
     def ebs_response_callback(self, future:rclpy.Future):
         try:
             result = future.result()
+
+            if result is None:
+                self.get_logger().error('EBS Service call returned no result, EBS Failed to trigger!')
+                return
+        
             if result.success:
                 self.get_logger().info('EBS triggered successfully!')
             else:

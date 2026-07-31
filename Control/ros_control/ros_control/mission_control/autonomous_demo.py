@@ -37,6 +37,21 @@ class Autonomous_Demo(Mission):
         # then use that for distance measurements rather than suvat equations,
         # as we cannot guaruantee a constant and accurate "a" value
 
+        self.has_perception = False
+
+    def __distance_check(self, target:float, acceleration:float):
+
+        if self.has_perception:
+            # get distance from there
+            return False
+        else:
+            # use suvat
+            if self.u*self.delta_t + 0.5*acceleration*self.delta_t**2 >= target:
+                return True
+            else:
+                return False
+
+
 
     def get_commands(self,current_state:Vehicle_State, desired_path: Optional[Path] = None):
         acceleration = 0.0
@@ -68,7 +83,7 @@ class Autonomous_Demo(Mission):
             acceleration = 2.0
             self.delta_t = time() - self.timer_start
             # check if 10m have passed using suvat
-            if 0.5 * acceleration * self.delta_t**2 >= 10: # s = ut + (1/2)at^2 (u=0, so not used)
+            if self.__distance_check(target=10,acceleration=acceleration): # s = ut + (1/2)at^2 (u=0, so not used)
                 # NOTE: this currently isnt a very good interpretation,
                 # really we should accelerate to 15kph, then stabilise speed and calculate distance based on that, if we dont have perception
                 self.progress_flag = self.demoFlag.BRAKE
@@ -84,7 +99,7 @@ class Autonomous_Demo(Mission):
             self.delta_t = self.timer_start - time()
 
             # decelerate at -2 for 8 metres, if we are still moving then brake harder
-            if self.u * self.delta_t + 0.5 * acceleration * self.delta_t**2 >= 8:
+            if self.__distance_check(target=8,acceleration=acceleration):
                 acceleration = -10.0
 
             if abs(current_state.wheels_rpm) <= 0.1:
@@ -101,7 +116,7 @@ class Autonomous_Demo(Mission):
             self.delta_t = time() - self.timer_start
 
             #check if 10m have passed using suvat
-            if self.u * self.delta_t + 0.5 * acceleration * self.delta_t**2 >= 10: # s = ut + (1/2)at^2
+            if self.__distance_check(target=10,acceleration=acceleration): # s = ut + (1/2)at^2
                 self.progress_flag = self.demoFlag.EMGCBRAKE
 
         #deploy ebs

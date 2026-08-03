@@ -6,7 +6,7 @@ from nav_msgs.msg import Path
 
 from mission_control.mission import Mission
 from model.vehical_model import Vehicle_State
-from MPC.main import Model_Predictive_Control
+from controllers.MPC import Model_Predictive_Control
 
 
 class Acceleration(Mission):

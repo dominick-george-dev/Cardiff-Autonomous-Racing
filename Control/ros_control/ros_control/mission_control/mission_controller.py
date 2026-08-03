@@ -6,7 +6,7 @@ import rclpy.logging
 
 
 from model.vehical_model import Vehicle_State
-from MPC.main import Model_Predictive_Control
+from controllers.MPC import Model_Predictive_Control
 from mission_control.static_A import Static_A
 from mission_control.static_B import Static_B
 from mission_control.autonomous_demo import Autonomous_Demo

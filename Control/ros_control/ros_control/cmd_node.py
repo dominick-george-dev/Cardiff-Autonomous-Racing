@@ -17,7 +17,7 @@ import math
 import numpy as np
 
 #
-from MPC.main import Model_Predictive_Control
+from controllers.main import Model_Predictive_Control
 from model.vehical_model import Vehicle_State, Vehicle_Constants
 
 from mission_control.mission_controller import Mission_Controller

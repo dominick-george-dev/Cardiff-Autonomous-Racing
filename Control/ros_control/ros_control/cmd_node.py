@@ -17,10 +17,10 @@ import math
 import numpy as np
 
 #
-from MPC.main import Model_Predictive_Control
-from model.vehical_model import Vehicle_Input, Vehicle_State, Vehicle_Constants
+from controllers.MPC import Model_Predictive_Control
+from model.vehical_model import Vehicle_State, Vehicle_Constants
 
-from mission_control import Mission_Control
+from mission_control.mission_controller import Mission_Controller
 class CmdNode(Node):
 
     def __init__(self):
@@ -83,10 +83,8 @@ class CmdNode(Node):
             self.ebs_client = self.create_client(Trigger, "ros_can/ebs")
 
         self.current_state = Vehicle_State(x_pos=0.0, y_pos=0.0, yaw_angle=0.0, x_speed=0.0, y_speed=0.0, yaw_rate=0.0)
-        
-        #self.mission_complete_pub = self.create_publisher(std_msgs.msg.Bool, 'ros_control/mission_complete', 10)
 
-        self.mission_controler = Mission_Control(mpc_unit=Model_Predictive_Control(self.timer_period,5.0),timer_period=self.timer_period,logger=self.get_logger,trigger_ebs=self.trigger_ebs)
+        self.mission_controler = Mission_Controller(mpc_unit=Model_Predictive_Control(self.timer_period,5.0),timer_period=self.timer_period,trigger_ebs=self.trigger_ebs)
 
         self.get_logger().info("Initialization complete")
     
@@ -104,6 +102,11 @@ class CmdNode(Node):
     def ebs_response_callback(self, future:rclpy.Future):
         try:
             result = future.result()
+
+            if result is None:
+                self.get_logger().error('EBS Service call returned no result, EBS Failed to trigger!')
+                return
+        
             if result.success:
                 self.get_logger().info('EBS triggered successfully!')
             else:
@@ -123,7 +126,7 @@ class CmdNode(Node):
         self.mission_controler.set_can_states(msg.ami_state,msg.as_state)
         if msg.as_state == CanState.AS_DRIVING:
             self.driving_flag = True
-        elif msg.as_state == CanState.AS_FINISHED:
+        else:
             self.driving_flag = False
         self.get_logger().info(f'Recieved: AMI:{msg.ami_state}, AS:{msg.as_state}')
 
@@ -139,8 +142,8 @@ class CmdNode(Node):
         steering = wheels.steering
         self.current_state.wheels_rpm = (rb+lb)/2
         if self.eufs_sim_type == 1:
-            # there is a bug where the rpm is always 500 less then reality
-            self.current_state.wheels_rpm -= 500
+            """# there is a bug where the rpm is always 500 less then reality
+            self.current_state.wheels_rpm -= 500"""
             steering*=-1
         elif self.eufs_sim_type == 2:
             # eufs sim 2 uses m/s rather than rpm in the msg, so convert

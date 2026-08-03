@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 try:
-    from MPC.main import Model_Predictive_Control
+    from controllers.MPC import Model_Predictive_Control
     from model.vehical_model import Dynamics_Model, Vehicle_Constants, Vehicle_Input, Vehicle_State
     from nav_msgs.msg import Path
     from geometry_msgs.msg import PoseStamped,Pose

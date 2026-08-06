@@ -38,34 +38,47 @@ You will need the following:
 
 A guide to dual-booting alongside windows can be found [online](https://www.freecodecamp.org/news/how-to-dual-boot-windows-10-and-ubuntu-linux-dual-booting-tutorial/). When partitioning, try to set aside at least 100GB, not just 20GB.
 
-### Dependencies
+### Clone the repo
 
-Once you have installed both Ubuntu and ROS, you should install some basic system dependencies.
+Once you have installed both Ubuntu and ROS, you are ready to get the code from this repo. Navigate to your desired file location using the terminal, then clone the repo using:
 
 ```bash
-sudo apt update && sudo apt upgrade -y
+git clone https://git.cardiff.ac.uk/c23015833/cardiff-autonomous-racing.git
+cd cardiff-autonomous-racing
+git submodules init
+git submodules update
+```
+
+
+### Dependencies
+
+Once you have installed both Ubuntu and ROS, you should install all the dependencies this project uses.
+
+
+```bash
 sudo apt install -y \
     git \
     wget \
-    curl \
-    build-essential \
     cmake \
+    build-essential \
+    iproute2 \
+    can-utils \
+    kmod \
+    gazebo \
+    gfortran \
     pkg-config \
+    python3-dev \
     python3-pip \
+    python3-rosdep \
+    python3-colcon-common-extensions \
+    python3-opencv \
+    python3-numpy \
     python3-venv \
-    python3-tk \
-    tk-dev \
-    libeigen3-dev \
-    libpangolin-dev \
-    libopencv-dev
-```
-
-### Extra ROS tools
-
-Next install some extra ROS packages required by our system, as well as the tools needed to compile ROS nodes:
-
-```bash
-sudo apt install -y \
+    python3-scipy \
+    python3-matplotlib \
+    python3-ament-package \
+    python3-pandas \
+    ros-humble-ackermann-msgs \
     ros-humble-geometry-msgs \
     ros-humble-std-msgs \
     ros-humble-nav-msgs \
@@ -73,8 +86,36 @@ sudo apt install -y \
     ros-humble-cv-bridge \
     ros-humble-image-transport \
     ros-humble-rqt* \
-    python3-colcon-common-extensions \
-    ros-dev-tools
+    ros-humble-std-srvs \
+    ros-humble-tf2 \
+    ros-humble-tf2-ros \
+    ros-humble-visualization-msgs \
+    ros-humble-ament-cmake \
+    ros-humble-ament-cmake-libraries \
+    ros-humble-ament-cmake-core \
+    ros-humble-ament-package \
+    ros-humble-rosidl-typesupport-c
+    ros-humble-gazebo-dev \
+    ros-humble-gazebo-ros \
+    ros-humble-xacro \
+    ros-humble-joint-state-publisher \
+    ros-humble-gazebo-plugins \
+    ros-humble-message-filters \
+    ros-humble-vision-opencv \
+    ros-dev-tools \
+    libeigen3-dev \
+    libopencv-dev \
+    libsuitesparse-dev \
+    libatlas-base-dev \
+    libgoogle-glog-dev \
+    libopenblas-dev \
+    liblapack-dev
+```
+
+And then some important python libraries.
+
+```bash
+pip install -r requirements.txt
 ```
 
 ### Perception

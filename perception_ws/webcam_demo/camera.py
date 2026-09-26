@@ -5,7 +5,7 @@ from ultralytics import YOLO
 from PIL import Image
 
 cap = cv.VideoCapture(0, cv.CAP_V4L2) 
-model = YOLO("cardiff-autonomous-racing/perception_ws/models/best.pt") # im gonna train a faster model for cpu
+model = YOLO("perception_ws/models/best.pt") # im gonna train a faster model for cpu
 
 if not cap.isOpened():
 

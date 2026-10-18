@@ -2,6 +2,7 @@ import ackermann_msgs.msg
 import rclpy
 from rclpy.node import Node
 import ackermann_msgs
+from tf_transformations import euler_from_quaternion
 
 import std_msgs
 import std_msgs.msg
@@ -197,26 +198,12 @@ class CmdNode(Node):
         status = msg.status
         pass
     
-    def get_yaw_from_quaternion(self,orientation:Quaternion):
-        """
-        Returns the yaw (rotation around z) in radians from a geometry_msgs.msg.Quaternion
-        """
-        x = orientation.x
-        y = orientation.y
-        z = orientation.z
-        w = orientation.w
-
-        # Yaw calculation
-        siny_cosp = 2.0 * (w * z + x * y)
-        cosy_cosp = 1.0 - 2.0 * (y * y + z * z)
-        yaw = math.atan2(siny_cosp, cosy_cosp)
-        return yaw
     def set_current_state(self, odometry:Odometry):
-        pose = odometry.pose
-        position = pose.pose.position
+        position = odometry.pose.pose.position
         
-        orientation = pose.pose.orientation
-        yaw = self.get_yaw_from_quaternion(orientation)
+        orientation = odometry.pose.pose.orientation
+        q_list = [orientation.x, orientation.y, orientation.z, orientation.w]
+        roll, pitch, yaw = euler_from_quaternion(q_list)
 
         twist = odometry.twist
         l_velocity = twist.twist.linear

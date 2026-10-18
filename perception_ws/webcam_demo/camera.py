@@ -5,8 +5,9 @@ from ultralytics import YOLO
 from PIL import Image
 
 cap = cv.VideoCapture(0)
-model = YOLO("perception_ws/models/best.pt") # im gonna train a faster model for cpu
+model = YOLO("perception_ws/models/best.pt")
 
+cv.namedWindow("cone detector", cv.WINDOW_NORMAL)  # resizable and maximisable
 if not cap.isOpened():
 
     print("Cannot open camera")
@@ -22,12 +23,14 @@ while True:
         print("Can't read frame")
         break  # exit the loop if stream drops
 
+    frame = cv.flip(frame, 1)
+
     if count % 3 == 0 or results == None:
         results = model.predict(frame, conf = 0.5, imgsz = 320) # can make this smaller if you want better performance
 
     for i, r in enumerate(results):
         im_bgr = r.plot()
-        cv.imshow("cone", im_bgr)
+        cv.imshow("cone detector", im_bgr)
     # wait for 1 millisecond per frame. If q is pressed, exit.
     count+=1
     if cv.waitKey(1) & 0xFF == ord('q'):

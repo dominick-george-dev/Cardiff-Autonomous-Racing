@@ -99,8 +99,6 @@ class Model_Predictive_Control():
         total_cost = 0
         for i in range(0,len(inputs)):
             total_cost += self.stage_cost(state=states[i],input=inputs[i],pose_stamped=required_path.poses[i],last=True if i+1 == self.horizon else False)
-        for i in range(0,len(inputs)):
-            total_cost += self.stage_cost(state=states[i],input=inputs[i],pose_stamped=required_path.poses[i],last=True if i+1 == self.horizon else False)
 
         return total_cost
 
@@ -120,11 +118,8 @@ class Model_Predictive_Control():
             inputs = self.previous_inputs
         if required_path == None: # if no path, dont do anything
             return [Vehicle_Input(acceleration=0.0,steering_angle=0.0)]
-            return [Vehicle_Input(acceleration=0.0,steering_angle=0.0)]
-        
-        self.horizon = len(required_path.poses)
-        self.horizon = len(required_path.poses)
 
+        self.horizon = len(required_path.poses)
         """# Initial guess: flatten list of Vehicle_Input into [a0, s0, a1, s1, ...]
         try:# create an initial guess based on the calculated inputs for the previous iteration
            # u0 = np.array([item for vi in self.previous_inputs for item in (vi.acceleration, vi.steering_angle)])
@@ -165,17 +160,7 @@ class Model_Predictive_Control():
         #res = minimize(objective, u0, bounds=bounds, method='Nelder-Mead', options={'maxiter': 100, 'disp': True})
         res = minimize(objective, u0, bounds=bounds, method='Nelder-Mead')
         
-        #res = minimize(objective, u0, bounds=bounds, method='Nelder-Mead', options={'maxiter': 100, 'disp': True})
-        res = minimize(objective, u0, bounds=bounds, method='Nelder-Mead')
-        
         best_inputs = unpack_inputs(res.x)
-        
-        if res.success: 
-            print("MPC Success")
-        else:
-            print("MPC Unsuccessful")
-            print(res.message)
-            #best_inputs = [Vehicle_Input(0,0) for x in range(self.horizon)]
         
         if res.success: 
             print("MPC Success")
